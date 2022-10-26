@@ -64,7 +64,6 @@ class ReversPolishNotation
     private function calculateFromArray(): float
     {
         $stack = [];
-        var_dump($this->array);
         foreach ($this->array as $item) {
             if (is_float($item)) {
                 $stack[] = $item;
@@ -117,7 +116,6 @@ class ReversPolishNotation
 
     private function prepareArray(): self
     {
-        var_dump($this->expression);
         $length = strlen($this->expression) - 1;
         $number = null;
 
