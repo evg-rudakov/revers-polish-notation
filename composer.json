@@ -1,0 +1,21 @@
+{
+    "name": "evg_rudakov/revers-polish-notation",
+    "description": "PHP Implementation of Reverse Polish Notation",
+    "minimum-stability": "stable",
+    "license": "proprietary",
+    "version":"1.0",
+    "authors": [
+        {
+            "name": "evg_rudakov",
+            "email": "dreammago@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "EvgRudakov\\ReversPolishNotation\\": ""
+        }
+    }
+}
