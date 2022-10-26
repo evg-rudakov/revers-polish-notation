@@ -33,7 +33,7 @@ $calc = new ReversPolishNotation();
 $calc->calculate($expression);
 
 
-echo 'Expression string is : ' . $calc->getExpression() . PHP_EOL;
-echo 'Calculation result is: ' . $calc->getResult() . PHP_EOL;
+echo 'Expression string is ' . $calc->getExpression() . PHP_EOL;
+echo 'Calculation result is ' . $calc->getResult() . PHP_EOL;
 
 ```
