@@ -3,8 +3,6 @@
 class ReversPolishNotation
 {
     private const UNARY_MINUS = '~';
-    private const OPEN_BRACKET = '(';
-    private const CLOSE_BRACKET = ')';
     private const MINUS = '-';
     private const PLUS = '+';
     private const DIVISION = '/';
@@ -12,8 +10,6 @@ class ReversPolishNotation
     private const EXPONENTIATION = '^';
 
     private const PRIORITY = [
-        self::OPEN_BRACKET => 0,
-        self::CLOSE_BRACKET => null,
         self::PLUS => 2,
         self::MINUS => 2,
         self::MULTIPLICATION => 3,
@@ -27,43 +23,37 @@ class ReversPolishNotation
     ];
 
     private array $stack = [];
-    private array $outString = [];
+    private array $array = [];
     private string $expression = '';
 
     private float $result;
-    private string $postfixString = '';
+    private ExpressionValidator $validator;
 
-    public function __construct(string $expression)
+    public function __construct()
     {
-        $preparer = new ExpressionPreparer($expression);
-
-        if ($preparer->prepare()) {
-            $this->setExpression($preparer->getPreparedExpression());
-        } else {
-            throw new \http\Exception\InvalidArgumentException($preparer->getError());
-        }
+        $this->validator = new ExpressionValidator();
     }
 
-    private function setExpression(string $expression)
+
+    private function setExpression(string $expression): void
     {
         $this->expression = $expression;
     }
 
-    public function setPostfixString(): self
+    public function getExpression(): string
     {
-        $this->postfixString = implode(' ', $this->outString);
-        return $this;
+        return $this->expression;
     }
 
-    public function calculate(): void
+    public function calculate(string $expression): void
     {
-        $this->result = $this->setOutString()->setPostfixString()->calcFromOutString();
-    }
+        if ($this->validator->validate($expression)) {
+            $this->setExpression($expression);
+        } else {
+            throw new DomainException($this->validator->getError());
+        }
 
-
-    public function getPostfixString(): string
-    {
-        return $this->postfixString;
+        $this->result = $this->prepareArray()->calculateFromArray();
     }
 
     public function getResult(): float
@@ -71,14 +61,16 @@ class ReversPolishNotation
         return $this->result;
     }
 
-    private function calcFromOutString(): float
+    private function calculateFromArray(): float
     {
         $stack = [];
-        foreach ($this->outString as $item) {
+        var_dump($this->array);
+        foreach ($this->array as $item) {
             if (is_float($item)) {
                 $stack[] = $item;
                 continue;
             }
+
             if ($item === self::UNARY_MINUS) {
                 $last = array_pop($stack);
                 if (!is_numeric($last)) {
@@ -87,19 +79,22 @@ class ReversPolishNotation
                 $stack[] = 0 - $last;
                 continue;
             }
+
             $right = array_pop($stack) ?? null;
             $left = array_pop($stack) ?? null;
-            if ($right === null || $left === null) {
+
+            if (is_null($right) || is_null($left)) {
                 throw new DomainException('Invalid Expression');
             }
-            $stack[] = $this->calc($left, $right, $item);
+
+            $stack[] = $this->makeOperator($left, $right, $item);
         }
 
         return $stack[0];
     }
 
 
-    private function calc($left, $right, $operator)
+    private function makeOperator($left, $right, $operator)
     {
         switch ($operator) {
             case self::MINUS:
@@ -120,8 +115,9 @@ class ReversPolishNotation
         }
     }
 
-    private function setOutString(): self
+    private function prepareArray(): self
     {
+        var_dump($this->expression);
         $length = strlen($this->expression) - 1;
         $number = null;
 
@@ -131,8 +127,8 @@ class ReversPolishNotation
             $right = $i === $length ? null : $this->expression[$i + 1];
 
             if ($item === '-') {
-                $arr = [self::PLUS, self::MULTIPLICATION, self::EXPONENTIATION, self::MINUS, self::DIVISION, self::OPEN_BRACKET];
-                if ($left === null || in_array($left, $arr)) {
+                $operators = [self::PLUS, self::MULTIPLICATION, self::EXPONENTIATION, self::MINUS, self::DIVISION];
+                if ($left === null || in_array($left, $operators)) {
                     $item = self::UNARY_MINUS;
                 }
             }
@@ -146,27 +142,19 @@ class ReversPolishNotation
                 $number .= $item;
 
                 if (!is_numeric($right)) {
-                    $this->outString[] = (float)$number;
+                    $this->array[] = (float)$number;
                     $number = null;
                 }
                 continue;
             }
 
             if (in_array($item, array_keys(self::PRIORITY))) {
-                if ($item === self::OPEN_BRACKET && is_numeric($left)) {
-                    $this->addToStackAndPushFromStack(self::MULTIPLICATION);
-                }
-
                 $this->addToStackAndPushFromStack($item);
-
-                if ($item === self::CLOSE_BRACKET && (is_numeric($right) || $right === self::OPEN_BRACKET)) {
-                    $this->addToStackAndPushFromStack(self::MULTIPLICATION);
-                }
             }
         }
 
         while ($this->stack) {
-            $this->outString[] = array_pop($this->stack);
+            $this->array[] = array_pop($this->stack);
         }
 
         return $this;
@@ -174,24 +162,12 @@ class ReversPolishNotation
 
     private function addToStackAndPushFromStack(string $operator)
     {
-        if (!$this->stack || $operator === self::OPEN_BRACKET) {
+        if (!$this->stack) {
             $this->stack[] = $operator;
             return;
         }
 
         $stack = array_reverse($this->stack);
-
-        if ($operator === self::CLOSE_BRACKET) {
-            foreach ($stack as $key => $item) {
-                unset($stack[$key]);
-                if ($item === self::OPEN_BRACKET) {
-                    $this->stack = array_reverse($stack);
-                    return;
-                }
-                $this->outString[] = $item;
-            }
-        }
-
         foreach ($stack as $key => $item) {
             if (in_array($item, self::RIGHT_ASSOCIATIVE_EXPRESSION) && $item === $operator) {
                 break;
@@ -201,7 +177,7 @@ class ReversPolishNotation
                 break;
             }
 
-            $this->outString[] = $item;
+            $this->array[] = $item;
             unset($stack[$key]);
         }
 

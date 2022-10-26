@@ -29,11 +29,11 @@ Once the extension is installed, simply use it in your code by  :
 
 ```php
 <?php
- 
-$calc = new ReversPolishNotation('3 * ((-25 - 10 * -2 ^ 2 / 4) * (4 + 5)) / 2');
+$expression = '1 2 + 4 * 3 + ';
+$calc = new ReversPolishNotation($expression);
 $calc->calculate();
 
-echo 'Postfix string is : ' . $calc->getPostfixString() . PHP_EOL;
+echo 'Expression string is : ' . $calc->getExpression() . PHP_EOL;
 echo 'Calculation result is: ' . $calc->getResult() . PHP_EOL;
 
 ```
