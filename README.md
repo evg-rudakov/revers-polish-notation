@@ -29,11 +29,12 @@ Once the extension is installed, simply use it in your code by  :
 
 ```php
 <?php
-$expression = '1 2 + 4 * 3 + ';
-$calc = new ReversPolishNotation($expression);
-$calc->calculate();
+$expression = '1 2 + 4 * 3 +';
+$calc = new ReversPolishNotation();
+$calc->calculate($expression);
+
 
 echo 'Expression string is : ' . $calc->getExpression() . PHP_EOL;
-echo 'Calculation result is: ' . $calc->getResult() . PHP_EOL;
+echo 'Calculation result is: ' . $cal
 
 ```
