@@ -82,7 +82,7 @@ class ReversPolishNotation
             if ($item === self::UNARY_MINUS) {
                 $last = array_pop($stack);
                 if (!is_numeric($last)) {
-                    throw new DomainException('Неверное выражение!');
+                    throw new DomainException('Invalid Expression');
                 }
                 $stack[] = 0 - $last;
                 continue;
@@ -90,7 +90,7 @@ class ReversPolishNotation
             $right = array_pop($stack) ?? null;
             $left = array_pop($stack) ?? null;
             if ($right === null || $left === null) {
-                throw new DomainException('Неверное выражение!');
+                throw new DomainException('Invalid Expression');
             }
             $stack[] = $this->calc($left, $right, $item);
         }
@@ -112,11 +112,11 @@ class ReversPolishNotation
                 return $left ** $right;
             case self::DIVISION:
                 if ($right == 0) {
-                    throw new DomainException('Деление на ноль!');
+                    throw new DomainException('Division by zero');
                 }
                 return $left / $right;
             default:
-                throw new DomainException('Неизвестный оператор ' . $operator);
+                throw new DomainException('Unknown operator ' . $operator);
         }
     }
 
@@ -140,7 +140,7 @@ class ReversPolishNotation
             if (is_numeric($item) || $item === '.') {
                 if ($item === '.') {
                     if (!is_numeric($left) || !is_numeric($right)) {
-                        throw new DomainException('Неверное дробное выражение!');
+                        throw new DomainException('Invalid fractional expression');
                     }
                 }
                 $number .= $item;

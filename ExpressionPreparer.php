@@ -21,14 +21,14 @@ class ExpressionPreparer
             preg_match('/-?\d+\s+-?\d+/', $this->expression, $matches);
 
             if ($matches) {
-                throw new DomainException('Между числами нет оператора!');
+                throw new DomainException('There is no operator between numbers');
             }
 
             $openBracket = substr_count($this->expression, self::OPEN_BRACKET);
             $closeBracket = substr_count($this->expression, self::CLOSE_BRACKET);
 
             if ($openBracket !== $closeBracket) {
-                throw new DomainException('Непарные скобки!');
+                throw new DomainException('Unpaired brackets');
             }
 
             $this->expression = preg_replace('/\s/', '', $this->expression);
@@ -36,7 +36,7 @@ class ExpressionPreparer
             preg_match('/[^\d()+\/*-.^]+/', $this->expression, $matches);
 
             if ($matches) {
-                throw new DomainException('Ошибка! В строке могут быть только цифры, скобки, и операторы +, -, *, /, ^');
+                throw new DomainException('String can only contain numbers, brackets, and operators such as +, -, *, /, ^');
             }
 
         } catch (Exception $e) {
